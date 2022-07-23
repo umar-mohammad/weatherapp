@@ -8,11 +8,18 @@ export default function WeatherCards() {
 
     return (
         <Grid container justifyContent="space-evenly" alignItems="stretch" spacing={2}>
-            {weatherData.map((cardData, i) => (
-                <Grid item lg={2} md={4} sm={4} xs={12} key={i}>
-                    <WeatherCard data={cardData} />
-                </Grid>
-            ))}
+            {weatherData.map((cardData, index) => {
+                if (index === 0) {
+                    cardData.day_of_week = "Today"
+                    cardData.date = ""
+                }
+
+                return (
+                    <Grid item lg={2} md={4} sm={4} xs={12} key={index}>
+                        <WeatherCard data={cardData} />
+                    </Grid>
+                )
+            })}
         </Grid>
     )
 }

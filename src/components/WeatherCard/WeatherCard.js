@@ -21,7 +21,7 @@ export default function WeatherCard({ data }) {
             }}
             elevation={elevation}
             onMouseOver={() => {
-                setElevation(12)
+                setElevation(20)
             }}
             onMouseOut={() => {
                 setElevation(3)
@@ -94,7 +94,7 @@ export default function WeatherCard({ data }) {
             <Box sx={{ display: "flex", justifyContent: "center", marginTop: -3 }}>
                 <img src={icon_url} alt="" style={{ height: 200 }} />
             </Box>
-            <Box sx={{ paddingX: 1, height: 100, marginLeft: 1 }}>
+            <Box sx={{ paddingX: 1, height: 130, marginLeft: 1 }}>
                 <Typography variant="h4">{conditions}</Typography>
                 <Typography variant="h5">{summary}</Typography>
             </Box>
