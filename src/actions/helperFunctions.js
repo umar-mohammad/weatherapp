@@ -1,25 +1,13 @@
-import * as api from "../api/index"
 import moment from "moment"
 
-export const getWeatherData = (lat, lon) => async (dispatch) => {
-    try {
-        const { data } = await api.fetchWeatherData(lat, lon)
-        const clean_data = getDayData(data)
-        console.log(`clean data: ${JSON.stringify(clean_data)}`)
-        dispatch({ type: "GET_WEATHER_DATA", payload: clean_data })
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-const aggregateEntriesByDay = (data) => {
+export const aggregateEntriesByDay = (data) => {
     const data_by_day = {}
 
     for (let i in data.list) {
         const entry = data.list[i]
 
         // eslint-disable-next-line no-unused-vars
-        const [date, _] = entry.dt_txt.split(" ")
+        const [date, time] = entry.dt_txt.split(" ")
 
         if (date in data_by_day) {
             data_by_day[date] = [...data_by_day[date], entry]
@@ -28,6 +16,56 @@ const aggregateEntriesByDay = (data) => {
         }
     }
     return data_by_day
+}
+
+export const getSummaryData = (data) => {
+    const day_data = []
+
+    for (let day in data) {
+        const entries = data[day]
+
+        const [day_of_week, date] = getDayAndDate(entries)
+        const [min_temp, max_temp] = getMinMaxTemps(entries)
+        const [conditions, summary, icon_url] = getConditionsSummaryAndIcon(entries)
+        const wind_speed = getAvgWindSpeed(entries)
+
+        day_data.push({
+            day_of_week,
+            date,
+            min_temp,
+            max_temp,
+            conditions,
+            summary,
+            wind_speed,
+            icon_url,
+        })
+    }
+
+    return day_data
+}
+
+export const getDetailData = (data) => {
+    const day_data = []
+
+    for (let day in data) {
+        const entries = data[day]
+        const details = entries.map((entry) => {
+            return {
+                date: entry.dt_txt,
+                conditions: entry.weather[0].main,
+                summary: entry.weather[0].description,
+                temperature: entry.main.temp,
+                pressure: entry.main.pressure,
+                humidity: entry.main.humidity,
+                wind: entry.wind.speed,
+                cloudiness: entry.clouds.all,
+                icon_url: `http://openweathermap.org/img/wn/${entry.weather[0].icon}@4x.png`,
+            }
+        })
+        day_data.push(details)
+    }
+
+    return day_data
 }
 
 const getMinMaxTemps = (entries) => {
@@ -68,32 +106,4 @@ const getConditionsSummaryAndIcon = (entries) => {
     const summary = median.weather[0].description
     const icon_url = `http://openweathermap.org/img/wn/${median.weather[0].icon}@4x.png`
     return [conditions, summary, icon_url]
-}
-
-const getDayData = (data) => {
-    const day_data = []
-
-    const entries_by_day = aggregateEntriesByDay(data)
-
-    for (let day in entries_by_day) {
-        const entries = entries_by_day[day]
-
-        const [day_of_week, date] = getDayAndDate(entries)
-        const [min_temp, max_temp] = getMinMaxTemps(entries)
-        const [conditions, summary, icon_url] = getConditionsSummaryAndIcon(entries)
-        const wind_speed = getAvgWindSpeed(entries)
-
-        day_data.push({
-            day_of_week,
-            date,
-            min_temp,
-            max_temp,
-            conditions,
-            summary,
-            wind_speed,
-            icon_url,
-        })
-    }
-
-    return day_data
 }
